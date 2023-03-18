@@ -1,19 +1,39 @@
 import sys
 import tkinter as tk
 from tkinter import messagebox, Menu
+from tkinter.filedialog import askopenfile, asksaveasfilename
 
 class MenuPrincipal(tk.Tk):
     def __init__(self):
         super().__init__()
         # Ventana principal
-        self.geometry("300x300")
+        #self.geometry("300x300")
         self.title("Menú principal")
         self.iconbitmap("img/flor.ico")
         # Hacer que la ventana no pueda cambiar su tamaño
-        self.resizable(0, 0)
+        #self.resizable(0, 0)
         self.crear_menu()
-        self.agregar_imagen()
+        # Configuración tamaño mínimo de la ventana (fila)
+        self.rowconfigure(0, minsize=600, weight=1)
+        # Configuración tamaño mínimo de la ventana (columna)
+        self.columnconfigure(0,minsize=600, weight=1)
 
+        self.campo_texto = tk.Text(self, wrap=tk.WORD)
+        # Atributo de archivo (ruta)
+        self.archivo = None
+        # Atributo para saber si ya se abrió un archivo anteriormente
+        self.archivo_activo = False
+        #Creación de componentes
+        self.crear_cuadro_texto()
+
+
+
+
+        #self.agregar_imagen()
+
+    def crear_cuadro_texto(self):
+        #Agregar el campo de texto
+        self.campo_texto.grid(row = 0, column=0, sticky="nswe")
     def agregar_imagen(self):
         self.img = tk.PhotoImage(file="img/fondo.png")
         self.lbl_img = tk.Label(self, image=self.img)
@@ -50,7 +70,22 @@ class MenuPrincipal(tk.Tk):
         self.config(menu=menu_principal)
 
     def abrir(self):
-        pass
+        #Abrir archivo para edición (lectura-escritura)
+        #askopenfile (explorador para abrir archivo)
+        self.archivo_activo = askopenfile(mode="r+")
+        # Revisar si hay un archivo
+        if not self.archivo_activo:
+            return
+        # Abrir el archivo en modo lectura/escritura como un recurso
+        with open(self.archivo_activo.name, "r+") as self.archivo:
+            # Eliminar el texto anterior (desde la primera linea hasta la ultima)
+            self.campo_texto.delete(1.0, tk.END)
+            #Leer el contenido del archivo
+            texto = self.archivo.read()
+            #Insertar el contenido del archivo (desde la primera línea)
+            self.campo_texto.insert(1.0, texto)
+            # Cambiar el título de la app
+            self.title(f"*Editor - {self.archivo.name}")
 
     def guardar(self):
         pass
