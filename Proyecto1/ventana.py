@@ -88,7 +88,18 @@ class MenuPrincipal(tk.Tk):
             self.title(f"*Editor - {self.archivo.name}")
 
     def guardar(self):
-        pass
+        # Si ya se abrió previamente un archivo, se sobreescribe
+        if self.archivo_activo:
+            # Salvar el archivo (modo escritura)
+            with open(self.archivo_activo.name, "w") as self.archivo:
+                # Leer el contenido de la caja de texto
+                texto = self.campo_texto.get(1.0, tk.END)
+                # Escribir el contenido al mismo archivo
+                self.archivo.write(texto)
+                # Cambiar el título de la app
+                self.title(f"Editor - {self.archivo.name}")
+        else:
+            self.guardar_como()
 
     def guardar_como(self):
         pass
