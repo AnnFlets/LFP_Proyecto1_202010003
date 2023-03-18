@@ -7,40 +7,30 @@ class MenuPrincipal(tk.Tk):
     def __init__(self):
         super().__init__()
         # Ventana principal
-        #self.geometry("300x300")
+        self.geometry("600x500")
         self.title("Menú principal")
         self.iconbitmap("img/flor.ico")
         # Hacer que la ventana no pueda cambiar su tamaño
-        #self.resizable(0, 0)
+        self.resizable(0, 0)
         self.crear_menu()
-        # Configuración tamaño mínimo de la ventana (fila)
-        self.rowconfigure(0, minsize=600, weight=1)
-        # Configuración tamaño mínimo de la ventana (columna)
-        self.columnconfigure(0,minsize=600, weight=1)
-
-        self.campo_texto = tk.Text(self, wrap=tk.WORD)
+        self.campo_texto = tk.Text(self)
         # Atributo de archivo (ruta)
         self.archivo = None
         # Atributo para saber si ya se abrió un archivo anteriormente
         self.archivo_activo = False
         #Creación de componentes
-        self.crear_cuadro_texto()
+        self.crear_componentes()
 
-
-
-
-        #self.agregar_imagen()
-
-    def crear_cuadro_texto(self):
-        #Agregar el campo de texto
-        self.campo_texto.grid(row = 0, column=0, sticky="nswe")
-    def agregar_imagen(self):
-        self.img = tk.PhotoImage(file="img/fondo.png")
-        self.lbl_img = tk.Label(self, image=self.img)
-        self.lbl_img.grid(row=2, column=0, columnspan=2)
+    # Crear el componente de scroll y configurar el cuadro de texto
+    def crear_componentes(self):
+        scroll = tk.Scrollbar(self)
+        scroll.pack(side=tk.RIGHT, fill=tk.Y)
+        self.campo_texto.pack(side=tk.LEFT, fill=tk.Y)
+        scroll.config(command=self.campo_texto.yview)
+        self.campo_texto.config(yscrollcommand=scroll.set)
 
     def crear_menu(self):
-        # Configurar el menú principal
+        # Crear el menú principal
         menu_principal = Menu(self)
         # tearoff = False, para evitar que el submenú se separe de la interfaz
         submenu_archivo = Menu(menu_principal, tearoff=False)
@@ -70,31 +60,31 @@ class MenuPrincipal(tk.Tk):
         self.config(menu=menu_principal)
 
     def abrir(self):
-        #Abrir archivo para edición (lectura-escritura)
-        #askopenfile (explorador para abrir archivo)
+        # Abrir archivo para edición (lectura-escritura)
+        # askopenfile (explorador para abrir archivo)
         self.archivo_activo = askopenfile(mode="r+")
-        # Revisar si hay un archivo
+        # Verificar si se seleccionó un archivo a abrir
         if not self.archivo_activo:
             return
         # Abrir el archivo en modo lectura/escritura como un recurso
         with open(self.archivo_activo.name, "r+") as self.archivo:
-            # Eliminar el texto anterior (desde la primera linea hasta la ultima)
+            # Eliminar el texto anterior (desde la primera línea hasta la última)
             self.campo_texto.delete(1.0, tk.END)
-            #Leer el contenido del archivo
+            # Leer el contenido del archivo y guardarlo en la variable texto
             texto = self.archivo.read()
-            #Insertar el contenido del archivo (desde la primera línea)
+            # Insertar el contenido del archivo (desde la primera línea)
             self.campo_texto.insert(1.0, texto)
             # Cambiar el título de la app
             self.title(f"*Editor - {self.archivo.name}")
 
     def guardar(self):
-        # Si ya se abrió previamente un archivo, se sobreescribe
+        # Si ya se abrió anteriormente un archivo se va a sobreescribe
         if self.archivo_activo:
-            # Salvar el archivo (modo escritura)
+            # Abrir el archivo en modo escritura como un recurso
             with open(self.archivo_activo.name, "w") as self.archivo:
-                # Leer el contenido de la caja de texto
+                # Leer el contenido del cuadro de texto por completo
                 texto = self.campo_texto.get(1.0, tk.END)
-                # Escribir el contenido al mismo archivo
+                # Escribir el contenido del cuadro de texto en el mismo archivo
                 self.archivo.write(texto)
                 # Cambiar el título de la app
                 self.title(f"Editor - {self.archivo.name}")
@@ -102,8 +92,25 @@ class MenuPrincipal(tk.Tk):
             self.guardar_como()
 
     def guardar_como(self):
-        pass
-
+        # Guardar el archivo actual como un nuevo archivo
+        # Configuración respecto a la extensión del archivo
+        self.archivo = asksaveasfilename(
+            defaultextension="txt",
+            filetypes=[("Archivos de texto", "*.txt"), ("Todos los archivos", "*.*")]
+        )
+        # Verificar si se va a guardar un archivo
+        if not self.archivo:
+            return
+        # Abrir el archivo en modo escritura como un recurso
+        with open(self.archivo, "w") as self.archivo:
+            #Leer el contenido del cuadro de texto por completo
+            texto = self.campo_texto.get(1.0, tk.END)
+            #Escribir el contenido en el nuevo archivo
+            self.archivo.write(texto)
+            # Cambiar el título de la app
+            self.title(f"Editor - {self.archivo.name}")
+            #Indicar que ya se abrió un archivo
+            self.archivo_activo = self.archivo
     def analizar(self):
         pass
 
